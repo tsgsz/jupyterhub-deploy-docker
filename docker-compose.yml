@@ -35,7 +35,8 @@ services:
       # Bind Docker volume on host for JupyterHub database and cookie secrets
       - "data:${DATA_VOLUME_CONTAINER}"
     ports:
-      - "10001:9000"
+      - "8009:9000"
+      - "10001:10001"
     links:
       - hub-db
     environment:
@@ -54,7 +55,7 @@ services:
       - secrets/postgres.env
       #- secrets/oauth.env
     command: >
-      jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
+        jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
 
 volumes:
   data:

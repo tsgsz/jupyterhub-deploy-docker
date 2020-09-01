@@ -19,12 +19,16 @@ c.DockerSpawner.image = os.environ['DOCKER_NOTEBOOK_IMAGE']
 # jupyter/docker-stacks *-notebook images as the Docker run command when
 # spawning containers.  Optionally, you can override the Docker run command
 # using the DOCKER_SPAWN_CMD environment variable.
-spawn_cmd = os.environ.get('DOCKER_SPAWN_CMD', "start-singleuser.sh")
-c.DockerSpawner.extra_create_kwargs.update({ 'command': spawn_cmd })
+# spawn_cmd = os.environ.get('DOCKER_SPAWN_CMD', "start-singleuser.sh")
 # Connect containers to this Docker network
 network_name = os.environ['DOCKER_NETWORK_NAME']
+# c.DockerSpawner.extra_create_kwargs.update({ 'command': spawn_cmd })
 c.DockerSpawner.use_internal_ip = True
+# c.DockerSpawner.internal_hostname = '0.0.0.0'
 c.DockerSpawner.network_name = network_name
+# c.DockerSpawner.network_name = "bridge"
+c.DockerSpawner.host_ip = "0.0.0.0"
+# c.DockerSpawner.ip = "0.0.0.0"
 # Pass the network name as argument to spawned containers
 c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
 # Explicitly set notebook directory because we'll be mounting a host volume to
@@ -39,7 +43,9 @@ c.DockerSpawner.volumes = { 'jupyterhub-user-{username}': notebook_dir }
 # volume_driver is no longer a keyword argument to create_container()
 # c.DockerSpawner.extra_create_kwargs.update({ 'volume_driver': 'local' })
 # Remove containers once they are stopped
-c.DockerSpawner.remove_containers = True
+# c.DockerSpawner.remove_containers = True
+c.DockerSpawner.remove = False
+
 # For debugging arguments passed to spawned containers
 c.DockerSpawner.debug = True
 
@@ -49,7 +55,7 @@ c.JupyterHub.hub_ip = 'jupyterhub'
 c.JupyterHub.hub_port = 9000
 
 # TLS config
-# c.JupyterHub.port = 10001
+c.JupyterHub.port = 10001
 # c.JupyterHub.ssl_key = os.environ['SSL_KEY']
 # c.JupyterHub.ssl_cert = os.environ['SSL_CERT']
 

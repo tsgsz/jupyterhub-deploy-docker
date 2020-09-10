@@ -1,1 +1,4 @@
-tsgsz admin
+tsgsz 
+tf-cpu tsgsz-tf-cpu
+tf-gpu tsgsz-tf-gpu
+tf1.15-gpu tsgsz-tf1.15-gpu

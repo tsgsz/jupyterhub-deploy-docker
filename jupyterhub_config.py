@@ -6,6 +6,7 @@ import os
 
 c = get_config()
 
+
 # We rely on environment variables to configure JupyterHub so that we
 # avoid having to rebuild the JupyterHub container every time we change a
 # configuration parameter.
@@ -13,7 +14,7 @@ c = get_config()
 # Spawn single-user servers as Docker containers
 c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
 # Spawn containers from this image
-c.DockerSpawner.image = os.environ['DOCKER_NOTEBOOK_IMAGE']
+# c.DockerSpawner.image = os.environ['DOCKER_NOTEBOOK_IMAGE']
 # JupyterHub requires a single-user instance of the Notebook server, so we
 # default to using the `start-singleuser.sh` script included in the
 # jupyter/docker-stacks *-notebook images as the Docker run command when
@@ -44,7 +45,8 @@ c.DockerSpawner.volumes = { 'jupyterhub-user-{username}': notebook_dir }
 # c.DockerSpawner.extra_create_kwargs.update({ 'volume_driver': 'local' })
 # Remove containers once they are stopped
 # c.DockerSpawner.remove_containers = True
-c.DockerSpawner.remove = False
+c.DockerSpawner.remove = True
+c.DockerSpawner.default_url = '/lab'
 
 # For debugging arguments passed to spawned containers
 c.DockerSpawner.debug = True
@@ -76,12 +78,14 @@ c.JupyterHub.db_url = 'postgresql://postgres:{password}@{host}/{db}'.format(
 )
 
 # Whitlelist users and admins
-c.LocalAuthenticator.create_system_users=True
-c.PAMAuthenticator.allowed_users = whitelist = set()
-c.Authenticator.admin_users = admin = set()
+# c.LocalAuthenticator.create_system_users=True
+c.Authenticator.allowed_users = whitelist = set()
+c.JupyterHub.authenticator_class = "dummy"
 c.JupyterHub.admin_access = True
 c.Authenticator.delete_invalid_users = True
+c.Authenticator.admin_users = whitelist
 pwd = os.path.dirname(__file__)
+users_info = dict()
 with open(os.path.join(pwd, 'userlist')) as f:
     for line in f:
         if not line:
@@ -91,5 +95,15 @@ with open(os.path.join(pwd, 'userlist')) as f:
         if len(parts) >= 1:
             name = parts[0]
             whitelist.add(name)
-            if len(parts) > 1 and parts[1] == 'admin':
-                admin.add(name)
+            if len(parts) >= 2:
+                image = parts[1]
+                users_info[name] = image
+
+def get_image(spawner):
+    user_name = spawner.user.name
+    if user_name in users_info:
+        spawner.image = users_info[user_name]
+    else:
+        spawner.image = os.environ['DOCKER_NOTEBOOK_IMAGE']
+
+c.DockerSpawner.pre_spawn_hook = get_image
